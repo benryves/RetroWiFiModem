@@ -212,6 +212,8 @@ ATX?<br>ATX*n* | Control the amount of information displayed in the result codes
 ATZ | Resets the modem.
 AT&F | Reset the NVRAM contents and current settings to the sketch defaults. All settings, including SSID name, password and speed dial slots are affected.
 AT&K?<br>AT&K*n* | Data flow control. Prevents the modem's buffers for received and transmitted from overflowing.<br><br><ul><li>&K0 Disable data flow control.</li><li>&K1 Use hardware flow control. Requires that your computer and software support Clear to Send (CTS) and Request to Send (RTS) at the RS-232 interface.</li></ul>
+AT&CS?<br>AT&CS*n* | CTS status. When hardware flow control is disabled this lets you query or set the state of the CTS line.<br><br><ul><li>&CS0 de-assert CTS.</li><li>&CS1 assert CTS.</li></ul>
+AT&RS? | RTS status. When hardware flow control is disabled this lets you query the state of the RTS line.
 AT&R?<br>AT&R=*server pwd* | Query or change the password for incoming connections. If set, the user has 3 chances in 60 seconds to enter the correct password or the modem will end the connection.
 AT&V*n* | Display current or stored settings.<br><br><ul><li>&V0 Display current settings.</li><li>&V1 Display stored settings.</li></ul>
 AT&W | Save current settings to NVRAM.

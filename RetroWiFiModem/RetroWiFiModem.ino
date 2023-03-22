@@ -232,7 +232,7 @@ void doAtCmds(char *atCmd) {
                } else if( !strncasecmp(atCmd, "$BM", 3) ) {
                   // query/set busy message
                   atCmd = doBusyMessage(atCmd + 3);
-               } else if( !strncasecmp(atCmd, "&R", 2) ) {
+               } else if( !strncasecmp(atCmd, "&R", 2) && strncasecmp(atCmd + 2, "S", 1) ) {
                   // query/set require password
                   atCmd = doServerPassword(atCmd + 2);
                } else if( !strncasecmp(atCmd, "I", 1) ) {
@@ -287,6 +287,12 @@ void doAtCmds(char *atCmd) {
                } else if( !strncasecmp(atCmd, "&K", 2) ) {
                   // do RTS/CTS flow control
                   atCmd = doFlowControl(atCmd + 2);
+               } else if( !strncasecmp(atCmd, "&CS", 3) ) {
+                  // do manual CTS control
+                  atCmd = doCtsControl(atCmd + 3);
+               } else if( !strncasecmp(atCmd, "&RS", 3) ) {
+                  // do manual RTS control
+                  atCmd = doRtsControl(atCmd + 3);
                } else if( !strncasecmp(atCmd, "$MDNS", 5) ) {
                   // handle mDNS name
                   atCmd = doMdnsName(atCmd + 5);

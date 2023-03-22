@@ -88,6 +88,66 @@ char *doFlowControl(char *atCmd) {
 }
 
 //
+// AT&RS? query RTS line status.
+//
+char *doRtsControl(char *atCmd) {   
+   if ( settings.rtsCts ) {
+      sendResult(R_ERROR);
+   } else {
+      switch( atCmd[0] ) {
+         case '?':
+            ++atCmd;
+            Serial.println(digitalRead(RTS) == ACTIVE);
+            if( !atCmd[0] ) {
+               sendResult(R_OK);
+            }
+            break;
+         default:
+            sendResult(R_ERROR);
+            break;
+      }
+   }
+   return atCmd;
+}
+
+//
+// AT&CS? query CTS line status.
+// AT&CS0 de-assert CTS line.
+// AT&CS1 assert CTS line.
+//
+
+char *doCtsControl(char *atCmd) {
+   if ( settings.rtsCts ) {
+      sendResult(R_ERROR);
+   } else {
+      switch( atCmd[0] ) {
+         case '?':
+            ++atCmd;
+            Serial.println(digitalRead(CTS) == ACTIVE);
+            if( !atCmd[0] ) {
+               sendResult(R_OK);
+            }
+            break;
+         case '0':
+         case '1':
+         case NUL:
+            digitalWrite(CTS, atCmd[0] == '1' ? ACTIVE : !ACTIVE);
+            if( atCmd[0] ) {
+               ++atCmd;
+            }
+            if( !atCmd[0] ) {
+               sendResult(R_OK);
+            }
+            break;
+         default:
+            sendResult(R_ERROR);
+            break;
+      }
+   }
+   return atCmd;
+}
+
+//
 // AT&R? query incoming password
 // AT&R=set incoming password
 //
