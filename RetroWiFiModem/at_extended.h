@@ -72,6 +72,7 @@ char *doFlowControl(char *atCmd) {
       case '1':
       case NUL:
          settings.rtsCts = atCmd[0] == '1';
+         updateHardwareFlow();
          if( atCmd[0] ) {
             ++atCmd;
          }

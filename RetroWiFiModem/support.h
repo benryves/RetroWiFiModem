@@ -570,6 +570,26 @@ void setHardwareFlow(void) {
    SET_PERI_REG_MASK(UART_CONF0(0), UART_TX_FLOW_EN);
 }
 
+void resetHardwareFlow(void) {
+   // Disable flow control of DTE -> ESP8266 data with CTS
+   CLEAR_PERI_REG_MASK(UART_CONF1(0), UART_RX_FLOW_EN);
+   pinMode(CTS, FUNCTION_3); // make pin GPIO15
+   pinMode(CTS, OUTPUT);
+   digitalWrite(CTS, ACTIVE);
+
+   CLEAR_PERI_REG_MASK(UART_CONF0(0), UART_TX_FLOW_EN);
+   pinMode(RTS, FUNCTION_3); // make pin GPIO13
+   pinMode(RTS, INPUT_PULLUP);
+}
+
+void updateHardwareFlow(void) {
+   if ( settings.rtsCts ) {
+      setHardwareFlow();
+   } else {
+      resetHardwareFlow();
+   }
+}
+
 // trim leading and trailing blanks from a string
 void trim(char *str) {
    char *trimmed = str;

@@ -58,9 +58,7 @@ void setup(void) {
 
    Serial.begin(settings.serialSpeed, getSerialConfig());
    digitalWrite(TXEN, LOW);      // enable the TX output
-   if( settings.rtsCts ) {
-      setHardwareFlow();
-   }
+   updateHardwareFlow();         // update CTS/RTS
    if( settings.startupWait ) {
       while( true ) {            // wait for a CR
          yield();
