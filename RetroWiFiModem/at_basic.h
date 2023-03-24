@@ -34,10 +34,12 @@ char *answerCall(char *atCmd) {
 // ATC1 connect to WiFi network
 //
 char *wifiConnection(char *atCmd) {
+   bool connected = WiFi.status() == WL_CONNECTED;
    switch( atCmd[0] ) {
       case '?':
          ++atCmd;
-         Serial.println(WiFi.status() == WL_CONNECTED ? '1' : '0');
+         digitalWrite(DSR, connected ? ACTIVE : !ACTIVE);
+         Serial.println(connected ? '1' : '0');
          if( !atCmd[0] ) {
             sendResult(R_OK);
          }
@@ -72,6 +74,7 @@ char *wifiConnection(char *atCmd) {
                Serial.println();
             }
             if( WiFi.status() != WL_CONNECTED ) {
+              digitalWrite(DSR, !ACTIVE);  // modem is not ready
                sendResult(R_ERROR);
             } else {
                digitalWrite(DSR, ACTIVE);  // modem is ready

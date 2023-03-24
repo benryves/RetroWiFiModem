@@ -109,6 +109,8 @@ void loop(void) {
 
    checkForIncomingCall();
 
+   digitalWrite(DSR, WiFi.status() == WL_CONNECTED ? ACTIVE : !ACTIVE);
+
    switch( state ) {
 
       case CMD_NOT_IN_CALL:
