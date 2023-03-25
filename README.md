@@ -23,6 +23,8 @@ brought over to v1).
 whereas before you'd need to save your changes then restart the modem.
 * AT&CS and AT&RS commands provide read/write and read-only access to the
 CTS and RTS lines respectively when hardware flow control is disabled.
+* AT$HOST can be used to query or change the hostname. ATI, AT&V and AT?
+have also been updated to cover this new command.
 
 ## Command reference
 
@@ -66,7 +68,8 @@ AT&Zn?<br>AT&Z*n*=*host[:port],alias* | Store up to 10 numbers in NVRAM, where *
 AT$AE?<br>AT$AE=*startup AT cmd* | Query or change the command line to be executed when the modem starts up.
 AT$AYT | Sends a Telnet "Are You There?" command if connected to a Telnet remote.
 AT$BM?<br>AT$BM=*server busy msg* | Query or change a message to be returned to an incoming connection if the modem is busy (i.e. already has a connection established).
-AT$MDNS<br>AT$MDNS=*mDNS name* | Query or change the mDNS network name (defaults to "espmodem"). When a non zero TCP port is defined, you can telnet to that port with **telnet mdnsname.local port**.
+AT$MDNS?<br>AT$MDNS=*mDNS name* | Query or change the mDNS network name (defaults to "RetroWiFiModem"). When a non zero TCP port is defined, you can telnet to that port with **telnet mdnsname.local port**.
+AT$HOST?<br>AT$HOST=*hostname* | Query or change the host name (defaults to ESP-*112233* where *112233* are last three bytes of the device's MAC in hexadecimal).
 AT$PASS?<br>AT$PASS=*WiFi pwd* | Query or change the current WiFi password. The password is case sensitive. Clear the password by issuing the set command with no password. The maximum length of the password is 64 characters.
 AT$SB?<br>AT$SB=*n* | Query or change the current baud rate. Valid values for "n" are 110, 300, 450, 600, 710, 1200, 2400, 4800, 9600, 19200, 38400, 57600, 76800 and 115200. Any other value will return an ERROR message. The default baud rate is 1200. The Retro WiFi modem does not automatically detect baud rate like a dial-up modem. The baud rate setting must match that of your terminal to operate properly. It will display garbage in your terminal otherwise.
 AT$SP?<br>AT$SP=*n* | TCP server port to listen on. A value of 0 means that the TCP server is disabled, and no incoming connections are allowed.

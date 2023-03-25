@@ -653,6 +653,7 @@ void displayCurrentSettings(void) {
    Serial.printf("Baud.......: %lu\r\n", settings.serialSpeed); yield();
    Serial.printf("SSID.......: %s\r\n", settings.ssid); yield();
    Serial.printf("Pass.......: %s\r\n", settings.wifiPassword); yield();
+   Serial.printf("Hostname...: %s\r\n", settings.hostName); yield();
    Serial.printf("mDNS name..: %s.local\r\n", settings.mdnsName); yield();
    Serial.printf("Server port: %u\r\n", settings.listenPort); yield();
    Serial.printf("Busy msg...: %s\r\n", settings.busyMsg); yield();
@@ -680,6 +681,7 @@ void displayStoredSettings(void) {
    uint16_t v_uint16;
    uint32_t v_uint32;
    char v_char16[16 + 1];
+   char v_char24[24 + 1];
    char v_char32[32 + 1];
    char v_char50[50 + 1];
    char v_char64[64 + 1];
@@ -688,6 +690,7 @@ void displayStoredSettings(void) {
    Serial.printf("Baud.......: %lu\r\n", EEPROM.get(offsetof(struct Settings, serialSpeed),v_uint32)); yield();
    Serial.printf("SSID.......: %s\r\n", EEPROM.get(offsetof(struct Settings, ssid), v_char32)); yield();
    Serial.printf("Pass.......: %s\r\n", EEPROM.get(offsetof(struct Settings, wifiPassword), v_char64)); yield();
+   Serial.printf("Hostname...: %s\r\n", EEPROM.get(offsetof(struct Settings, hostName), v_char24)); yield();
    Serial.printf("mDNS name..: %s.local\r\n", EEPROM.get(offsetof(struct Settings, mdnsName), v_char80)); yield();
    Serial.printf("Server port: %u\r\n", EEPROM.get(offsetof(struct Settings, listenPort), v_uint16)); yield();
    Serial.printf("Busy Msg...: %s\r\n", EEPROM.get(offsetof(struct Settings, busyMsg),v_char80)); yield();

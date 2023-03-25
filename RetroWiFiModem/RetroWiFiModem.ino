@@ -70,6 +70,10 @@ void setup(void) {
       }
    }
 
+   if( settings.hostName[0] ) {
+     WiFi.hostname(settings.hostName);
+   }
+
    WiFi.begin();
    if( settings.ssid[0] ) {
       WiFi.waitForConnectResult();
@@ -298,6 +302,9 @@ void doAtCmds(char *atCmd) {
                } else if( !strncasecmp(atCmd, "$MDNS", 5) ) {
                   // handle mDNS name
                   atCmd = doMdnsName(atCmd + 5);
+               } else if( !strncasecmp(atCmd, "$HOST", 5) ) {
+                  // handle hostname
+                  atCmd = doHostName(atCmd + 5);
                } else {
                   // unrecognized command
                   sendResult(R_ERROR);
