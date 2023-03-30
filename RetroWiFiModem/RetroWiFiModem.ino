@@ -54,7 +54,8 @@ void setup(void) {
       // no valid data in EEPROM/NVRAM, populate with defaults
       factoryDefaults(NULL);
    }
-   sessionTelnetType = settings.telnet;
+   sessionTelnetTypeSend = settings.telnet;
+   sessionTelnetTypeReceive = settings.telnet;
 
    Serial.begin(settings.serialSpeed, getSerialConfig());
    digitalWrite(TXEN, LOW);      // enable the TX output

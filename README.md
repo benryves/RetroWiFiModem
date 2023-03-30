@@ -25,6 +25,12 @@ whereas before you'd need to save your changes then restart the modem.
 CTS and RTS lines respectively when hardware flow control is disabled.
 * AT$HOST can be used to query or change the hostname. ATI, AT&V and AT?
 have also been updated to cover this new command.
+* When in Telnet mode `WILL`/`WON'T`/`DO`/`DON'T` `TRANSMIT-BINARY` enable
+or disable binary transmission mode for the receiver or transmitter as
+appropriate. Binary transmission mode is referred to as "fake" Telnet in
+the RetroWiFiModem documentation, with "real" Telnet being NVT ASCII mode.
+In NVT ASCII mode `CR` is normally escaped to `CR` `NUL` unless it's a line
+break (`CR` `LF`). In binary mode `CR` is left alone.
 
 ## Command reference
 
