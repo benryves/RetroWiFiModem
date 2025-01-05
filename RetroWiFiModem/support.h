@@ -71,9 +71,9 @@ void sendSerialData() {
       for( size_t i = 0; i < len; ++i ) {
          if( txBuf[i] == settings.escChar ) {
             if( ++escCount == ESC_COUNT ) {
-               guardTime = millis() + GUARD_TIME;
+               startGuardTime = millis();
             } else {
-               guardTime = 0;
+               startGuardTime = 0;
             }
          } else {
             escCount = 0;
@@ -428,8 +428,8 @@ void checkForIncomingCall() {
             if( !settings.autoAnswer || ringCount < settings.autoAnswer ) {
                sendResult(R_RING);     // only show RING if we're not just
             }                          // about to answer
-            nextRingMs = millis() + RING_INTERVAL;
-         } else if( millis() > nextRingMs ) {
+            lastRingMs = millis();
+         } else if( millis() - lastRingMs > RING_INTERVAL ) {
             if( digitalRead(RI) == ACTIVE ) {
                digitalWrite(RI, !ACTIVE);
             } else {
@@ -439,7 +439,7 @@ void checkForIncomingCall() {
                   sendResult(R_RING);
                }
             }
-            nextRingMs = millis() + RING_INTERVAL;
+            lastRingMs = millis();
          }
       } else if( settings.autoAnswer && ringCount >= settings.autoAnswer ) {
          digitalWrite(RI, !ACTIVE);
