@@ -356,7 +356,7 @@ char *httpGet(char *atCmd) {
 // ATH go offline (if connected to a host)
 //
 char *hangup(char *atCmd) {
-   if( tcpClient.connected() ) {
+   if( ppp || tcpClient.connected() ) {
       endCall();
    } else {
       sendResult(R_ERROR);

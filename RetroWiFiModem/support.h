@@ -393,6 +393,7 @@ void endCall() {
    state = CMD_NOT_IN_CALL;
    if (ppp) {
       ppp_close(ppp, 0);
+      while (ppp) yield(); // wait for callback to close the connection
    } else {
       tcpClient.stop();
    }

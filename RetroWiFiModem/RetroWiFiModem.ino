@@ -137,7 +137,7 @@ void loop(void) {
 
       case CMD_IN_CALL:
          inAtCommandMode();
-         if( state == CMD_IN_CALL && !tcpClient.connected() ) {
+         if( state == CMD_IN_CALL && !ppp && !tcpClient.connected() ) {
             endCall();                    // hang up if not in a call
          }
          break;
