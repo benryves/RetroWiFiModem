@@ -853,3 +853,20 @@ static bool PagedOut(const __FlashStringHelper *flashStr, bool reset=false) {
    return PagedOut(str, reset);
 }
 
+bool ensureWiFiReconnected(void) {
+   
+   // Are we already connected?
+   if( WiFi.status() == WL_CONNECTED ) return true;
+
+   // Is there a saved SSID/password we can try with?
+   if( settings.ssid[0] && settings.wifiPassword[0] ) {
+      WiFi.begin(settings.ssid, settings.wifiPassword);
+      for( int i = 0; i < 500 && WiFi.status() != WL_CONNECTED; ++i ) {
+         delay(50);
+         yield();
+      }
+   }
+
+   // Return whether we actually connected or not
+   return WiFi.status() == WL_CONNECTED;
+}

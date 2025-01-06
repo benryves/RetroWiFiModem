@@ -202,6 +202,9 @@ char *dialNumber(char *atCmd) {
             Serial.flush();
          }
 
+         // Force a reconnection to WiFi if possible
+         ensureWiFiReconnected();
+
          ppp = pppos_create(&ppp_netif, ppp_output_cb, ppp_status_cb, NULL);
          // usepeerdns also means offer our configured DNS servers during negotiation
          ppp_set_usepeerdns(ppp, 1);
@@ -237,6 +240,10 @@ char *dialNumber(char *atCmd) {
       Serial.printf("DIALLING %s:%u\r\n", host, portNum);
       Serial.flush();
    }
+   
+   // Force a reconnection to WiFi if possible
+   ensureWiFiReconnected();
+
    delay(2000);   // delay for ZMP to be able to detect CONNECT
    if( !Serial.available() && tcpClient.connect(host, portNum) ) {
       connectTime = millis();
@@ -321,6 +328,7 @@ char *httpGet(char *atCmd) {
    Serial.printf(" from port %u of host %s...\r\n", portNum, host);
 #endif
    // Establish connection
+   ensureWiFiReconnected();
    if( !tcpClient.connect(host, portNum) ) {
       sendResult(R_NO_CARRIER);
       digitalWrite(DCD, !ACTIVE);
@@ -634,6 +642,7 @@ char *doDateTime(char *atCmd) {
    bool ok = false;
    if( !tcpClient.connected() ) {
       char result[80], *ptr;
+      ensureWiFiReconnected();
       if( tcpClient.connect(NIST_HOST, NIST_PORT) ) {
          digitalWrite(DCD, ACTIVE);
          // read date/time from NIST
