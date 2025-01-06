@@ -853,6 +853,7 @@ static bool PagedOut(const __FlashStringHelper *flashStr, bool reset=false) {
    return PagedOut(str, reset);
 }
 
+// Reconnect using the saved Wi-Fi details if required
 bool ensureWiFiReconnected(void) {
    
    // Are we already connected?
