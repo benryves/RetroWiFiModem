@@ -31,6 +31,8 @@ appropriate. Binary transmission mode is referred to as "fake" Telnet in
 the RetroWiFiModem documentation, with "real" Telnet being NVT ASCII mode.
 In NVT ASCII mode `CR` is normally escaped to `CR` `NUL` unless it's a line
 break (`CR` `LF`). In binary mode `CR` is left alone.
+* PPP connections can be made by dialling the special number `*99#`. This
+number can be changed with AT$PPP.
 
 ## Command reference
 
@@ -77,6 +79,7 @@ AT$BM?<br>AT$BM=*server busy msg* | Query or change a message to be returned to 
 AT$MDNS?<br>AT$MDNS=*mDNS name* | Query or change the mDNS network name (defaults to "RetroWiFiModem"). When a non zero TCP port is defined, you can telnet to that port with **telnet mdnsname.local port**.
 AT$HOST?<br>AT$HOST=*hostname* | Query or change the host name (defaults to ESP-*112233* where *112233* are last three bytes of the device's MAC in hexadecimal).
 AT$PASS?<br>AT$PASS=*WiFi pwd* | Query or change the current WiFi password. The password is case sensitive. Clear the password by issuing the set command with no password. The maximum length of the password is 64 characters.
+AT$PPP?<br>AT$PPP=*PPP number* | Query or change the number that, when dialled, establishes a PPP connection.
 AT$SB?<br>AT$SB=*n* | Query or change the current baud rate. Valid values for "n" are 110, 300, 450, 600, 710, 1200, 2400, 4800, 9600, 19200, 38400, 57600, 76800 and 115200. Any other value will return an ERROR message. The default baud rate is 1200. The Retro WiFi modem does not automatically detect baud rate like a dial-up modem. The baud rate setting must match that of your terminal to operate properly. It will display garbage in your terminal otherwise.
 AT$SP?<br>AT$SP=*n* | TCP server port to listen on. A value of 0 means that the TCP server is disabled, and no incoming connections are allowed.
 AT$SSID?<br>AT$SSID=*ssid name* | Query or change the current SSID to the specified name. The given SSID name is case sensitive. Clear the SSID by issuing the set command with no SSID. The maximum length of the SSID name is 32 characters.
@@ -89,7 +92,9 @@ AT$W?<br>AT$W=*n* | Startup wait.<br><br><ul><li>$W=0 Startup with no wait.</li>
 ## References
 
 * [mecparts' RetroWiFiModem](https://github.com/mecparts/RetroWiFiModem)
+* [ssshake's vintage-computer-wifi-modem](https://github.com/ssshake/vintage-computer-wifi-modem/)
 
 ## Acknowledgements
 
 * Thank you to mecparts for sharing their excellent work!
+* The PPP implementation was heavily cribbed from ssshake's vintage-computer-wifi-modem.
