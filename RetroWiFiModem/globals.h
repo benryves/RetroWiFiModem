@@ -17,6 +17,9 @@
 
    WiFiServer tcpServer(0);
 
+   ppp_pcb *ppp;
+   struct netif ppp_netif;
+
    struct Settings {
       uint16_t  magicNumber;
       char      ssid[MAX_SSID_LEN + 1];
@@ -64,4 +67,5 @@
    uint8_t  sessionTelnetTypeSend;
    uint8_t  sessionTelnetTypeReceive;
    bool     amClient = true;     // true if we've dialled out, rather than been dialled into
+   int32_t  selectedRegister = -1;
 #endif

@@ -185,6 +185,54 @@ char *dialNumber(char *atCmd) {
    sessionTelnetTypeReceive = sessionTelnetTypeSend;
 
    yield();
+
+   // are we dialling a PPP connection?
+   if ( !strcasecmp(host, "PPP") ) {
+      if ( ppp ) {
+         Serial.println("PPP already active");
+         sendResult(R_ERROR);
+         goto done;
+      } else {
+
+         // must not use telnet over PPP
+         sessionTelnetTypeReceive = sessionTelnetTypeSend = NO_TELNET;
+
+         if( !settings.quiet && settings.extendedCodes ) {
+            Serial.println("CONNECTING TO PPP");
+            Serial.flush();
+         }
+
+         ppp = pppos_create(&ppp_netif, ppp_output_cb, ppp_status_cb, NULL);
+         // usepeerdns also means offer our configured DNS servers during negotiation
+         ppp_set_usepeerdns(ppp, 1);
+         ppp_set_ipcp_dnsaddr(ppp, 0, ip_2_ip4((const ip_addr_t*)WiFi.dnsIP(0)));
+         ppp_set_ipcp_dnsaddr(ppp, 1, ip_2_ip4((const ip_addr_t*)WiFi.dnsIP(1)));
+
+         #if PPP_AUTH_SUPPORT
+            ppp_set_auth(ppp, PPPAUTHTYPE_NONE, "", "");
+            ppp_set_auth_required(ppp, 0);
+         #endif
+         ppp_set_ipcp_ouraddr(ppp, ip_2_ip4((const ip_addr_t*)WiFi.localIP()));
+         ppp_set_ipcp_hisaddr(ppp, ip_2_ip4((const ip_addr_t*)IPAddress(192,168,240,2)));
+         err_t ppp_err;
+         ppp_err = ppp_listen(ppp);
+         if (ppp_err == PPPERR_NONE) {
+            connectTime = millis();
+            sendResult(R_CONNECT);
+            digitalWrite(DCD, ACTIVE);
+            amClient = true;
+            state = ONLINE;
+            yield();
+         } else {
+            Serial.println("ppp_listen failed\n");
+            ppp_status_cb(ppp, ppp_err, NULL);
+            ppp_close(ppp, 1);
+            sendResult(R_ERROR);
+         }
+         goto done;
+      }
+   }
+
    if( !settings.quiet && settings.extendedCodes ) {
       Serial.printf("DIALLING %s:%u\r\n", host, portNum);
       Serial.flush();
@@ -201,6 +249,7 @@ char *dialNumber(char *atCmd) {
       sendResult(R_NO_CARRIER);
       digitalWrite(DCD, !ACTIVE);
    }
+done:
    atCmd[0] = NUL;
    return atCmd;
 }
@@ -479,7 +528,9 @@ char *showNetworkInfo(char *atCmd) {
       if( PagedOut(infoLine) ) break;
       snprintf_P(infoLine, sizeof infoLine, PSTR("Sketch free: %lu"), ESP.getFreeSketchSpace() % (1024L * 1024L));
       if( PagedOut(infoLine) ) break;
-      if( tcpClient.connected() ) {
+      if( ppp ) {
+         if( PagedOut(F("Call status: CONNECTED TO PPP")) ) break;
+      } else if( tcpClient.connected() ) {
          snprintf_P(infoLine, sizeof infoLine, PSTR("Call status: CONNECTED TO %s"), tcpClient.remoteIP().toString().c_str());
          if( PagedOut(infoLine) ) break;
          snprintf_P(infoLine, sizeof infoLine, PSTR("Call length: %s"), connectTimeString());
@@ -534,7 +585,7 @@ char *doTelnetMode(char* atCmd) {
 // ATO go online (if connected to a host)
 //
 char *goOnline(char *atCmd) {
-   if( tcpClient.connected() ) {
+   if( tcpClient.connected() || ppp ) {
       state = ONLINE;
       sendResult(R_CONNECT);
    } else {
@@ -621,76 +672,6 @@ char *doDateTime(char *atCmd) {
 }
 
 //
-// ATS0?  query auto answer configuration
-// ATS0=0 disable auto answer
-// ATS0=n enable auto answer after n rings
-//
-char *doAutoAnswerConfig(char *atCmd) {
-   switch( atCmd[0] ) {
-      case '?':
-         ++atCmd;
-         Serial.println(settings.autoAnswer);
-         if( !atCmd[0] ) {
-            sendResult(R_OK);
-         }
-         break;
-      case '=':
-         ++atCmd;
-         if( isDigit(atCmd[0]) ) {
-            settings.autoAnswer = atoi(atCmd);
-            while( isDigit(atCmd[0]) ) {
-               ++atCmd;
-            }
-            if( !atCmd[0] ) {
-               sendResult(R_OK);
-            }
-         } else {
-            sendResult(R_ERROR);
-         }
-         break;
-      default:
-         sendResult(R_ERROR);
-         break;
-   }
-   return atCmd;
-}
-
-//
-// ATS2?  query escape character
-// ATS2=[128..255] disable escape character
-// ATS2=[0..127] set and enable escape character
-//
-char *doEscapeCharConfig(char *atCmd) {
-   switch( atCmd[0] ) {
-      case '?':
-         ++atCmd;
-         printf("%u\r\n", settings.escChar);
-         if( !atCmd[0] ) {
-            sendResult(R_OK);
-         }
-         break;
-      case '=':
-         ++atCmd;
-         if( isdigit(atCmd[0]) ) {
-            settings.escChar = atoi(atCmd);
-            while( isdigit(atCmd[0]) ) {
-               ++atCmd;
-            }
-            if( !atCmd[0] ) {
-               sendResult(R_OK);
-            }
-         } else {
-            sendResult(R_ERROR);
-         }
-         break;
-      default:
-         sendResult(R_ERROR);
-         break;
-   }
-   return atCmd;
-}
-
-//
 // ATV? query verbose mode status
 // ATV0 disable verbose mode (results are shown as numbers)
 // ATV1 enable verbose nmode (results are shown as text)
@@ -764,3 +745,136 @@ char *resetToNvram(char *atCmd) {
    return atCmd;                       // should never actually get here...
 }
 
+//
+// ATM speaker mute
+//
+char *doSpeakerMute(char *atCmd) {
+   switch ( atCmd[0] ) {
+      case '0': // Mute
+      case '1': // Speaker on until remote carrier detected
+      case '2': // Speaker always on
+      case '3': // Mute
+         ++atCmd;
+         break;
+      default:  // Mute
+         break;
+   }
+   if( !atCmd[0] ) {
+      sendResult(R_OK);
+   }
+   return atCmd;
+}
+
+//
+// ATL speaker loudness
+//
+char *doSpeakerLoudness(char *atCmd) {
+   switch ( atCmd[0] ) {
+      case '0': // Off
+      case '1': // Quiet
+      case '2': // Medium
+      case '3': // Loud
+         ++atCmd;
+         if( !atCmd[0] ) {
+            sendResult(R_OK);
+         }
+         break;
+      default:
+         sendResult(R_ERROR);
+         break;
+   }
+   return atCmd;
+}
+
+//
+// ATSn select register
+//
+char *doSelectRegister(char *atCmd) {
+   
+   selectedRegister = 0;
+   while( isDigit( atCmd[0] ) ) {
+      selectedRegister *= 10;
+      selectedRegister += atCmd[0] - '0';
+      ++atCmd;
+   }
+   
+   if( !atCmd[0] ) {
+      sendResult(R_OK);
+   }
+
+   return atCmd;
+}
+
+//
+// AT= set register
+//
+char *doSetRegister(char *atCmd) {
+
+   int value = 0;
+   while( isDigit( atCmd[0] ) ) {
+      value *= 10;
+      value += atCmd[0] - '0';
+      ++atCmd;
+   }
+
+   switch ( selectedRegister ) {
+      case 0:
+         settings.autoAnswer = value;
+         break;
+      case 1:
+         ringCount = value;
+         break;
+      case 2:
+         settings.escChar = value;
+         break;
+      case 8:
+         break;
+      default:
+         sendResult(R_ERROR);
+         return atCmd;
+   }
+   
+   if( !atCmd[0] ) {
+      sendResult(R_OK);
+   }
+
+   return atCmd;
+
+}
+
+//
+// AT? query register
+//
+char *doQueryRegister(char *atCmd) {
+
+   int value = -1;
+
+   switch ( selectedRegister ) {
+      case 0:
+         value = settings.autoAnswer;
+         break;
+      case 1:
+         value = ringCount;
+         break;
+      case 2:
+         value = settings.escChar;
+         break;
+      case 8:
+         value = 2;
+         break;
+   }
+
+   if ( value < 0 ) {
+      sendResult(R_ERROR);
+      return atCmd;
+   }
+
+   Serial.println(value);
+
+   if ( !atCmd[0] ) {
+      sendResult(R_OK);
+   }
+
+   return atCmd;
+
+}

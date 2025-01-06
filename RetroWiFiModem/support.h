@@ -102,8 +102,14 @@ void sendSerialData() {
          }
       }
    }
-   bytesOut += tcpClient.write(txBuf, len);
-   yield();
+
+   if ( ppp ) {
+      pppos_input(ppp, txBuf, len);
+      bytesOut += len;
+   } else {
+      bytesOut += tcpClient.write(txBuf, len);
+      yield();
+   }
 }
 
 //
@@ -385,7 +391,11 @@ void sendResult(int resultCode) {
 //
 void endCall() {
    state = CMD_NOT_IN_CALL;
-   tcpClient.stop();
+   if (ppp) {
+      ppp_close(ppp, 0);
+   } else {
+      tcpClient.stop();
+   }
    sendResult(R_NO_CARRIER);
    connectTime = 0;
    digitalWrite(DCD, !ACTIVE);

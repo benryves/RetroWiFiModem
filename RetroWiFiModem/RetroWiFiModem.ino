@@ -21,6 +21,12 @@
 //   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 //
 
+#include <lwip/napt.h>
+#include <lwip/dns.h>
+#include <lwip/netif.h>
+#include <netif/ppp/ppp.h>
+#include <netif/ppp/pppos.h>
+
 #include <ESP8266WiFi.h>
 #include <ESP_EEPROM.h>
 #include <WiFiUdp.h>
@@ -30,6 +36,7 @@
 #include "RetroWiFiModem.h"
 #include "globals.h"
 #include "support.h"
+#include "ppp.h"
 #include "at_basic.h"
 #include "at_extended.h"
 #include "at_proprietary.h"
@@ -47,6 +54,9 @@ void setup(void) {
    digitalWrite(RI, !ACTIVE);    // not ringing
    digitalWrite(DCD, !ACTIVE);   // not connected
    digitalWrite(DSR, !ACTIVE);   // modem is not ready
+
+   // the esp fork of LWIP doesn't automatically init when enabling nat, so just do it in setup
+   ip_napt_init(IP_NAPT_MAX, IP_PORTMAP_MAX);
 
    EEPROM.begin(sizeof(struct Settings));
    EEPROM.get(0, settings);
@@ -141,7 +151,7 @@ void loop(void) {
             sendSerialData();
          }
 
-         while( tcpClient.available() && !Serial.available() ) { // data from WiFi to RS-232
+         while( !ppp && tcpClient.available() && !Serial.available() ) { // data from WiFi to RS-232
             int c = receiveTcpData();
             if( c != -1 ) {
                Serial.write((char)c);
@@ -154,7 +164,7 @@ void loop(void) {
             escCount = 0;
          }
 
-         if( !tcpClient.connected() ) {   // no client?
+         if( !ppp && !tcpClient.connected() ) {   // no client?
             endCall();                    // then hang up
          }
          break;
@@ -183,7 +193,7 @@ void doAtCmds(char *atCmd) {
          } else {
             trim(atCmd);
             while( atCmd[0] ) {
-               if( !strncasecmp(atCmd, "?", 1)  ) { // help message
+               if( !strncasecmp(atCmd, "?", 1) && selectedRegister < 0 ) { // help message
                   // help
                   atCmd = showHelp(atCmd + 1);
                } else if( !strncasecmp(atCmd, "$AYT", 4) ) {
@@ -227,12 +237,15 @@ void doAtCmds(char *atCmd) {
                } else if( settings.listenPort && !strncasecmp(atCmd, "A", 1) && tcpServer.hasClient() ) {
                   // manually answer incoming connection
                   atCmd = answerCall(atCmd + 1);
-               } else if( !strncasecmp(atCmd, "S0", 2) ) {
-                  // query/set auto answer
-                  atCmd = doAutoAnswerConfig(atCmd + 2);
-               } else if( !strncasecmp(atCmd, "S2", 2) ) {
-                  // query/set escape character
-                  atCmd = doEscapeCharConfig(atCmd + 2);
+               } else if( !strncasecmp(atCmd, "S", 1) && isDigit(atCmd[1]) ) {
+                  // select register
+                  atCmd = doSelectRegister(atCmd + 1);
+               } else if ( !strncasecmp(atCmd, "=", 1) && isDigit(atCmd[1]) ) {
+                  // set register
+                  atCmd = doSetRegister(atCmd + 1);
+               } else if ( !strncasecmp(atCmd, "?", 1) ) {
+                  // query register
+                  atCmd = doQueryRegister(atCmd + 1);
                } else if( !strncasecmp(atCmd, "$SP", 3) ) {
                   // query set inbound TCP port
                   atCmd = doServerPort(atCmd + 3);
@@ -306,6 +319,12 @@ void doAtCmds(char *atCmd) {
                } else if( !strncasecmp(atCmd, "$HOST", 5) ) {
                   // handle hostname
                   atCmd = doHostName(atCmd + 5);
+               } else if( !strncasecmp(atCmd, "M", 1) ) {
+                  // speaker mute
+                  atCmd = doSpeakerMute(atCmd + 1);
+               } else if( !strncasecmp(atCmd, "L", 1) ) {
+                  // speaker loudness
+                  atCmd = doSpeakerLoudness(atCmd + 1);
                } else {
                   // unrecognized command
                   sendResult(R_ERROR);
