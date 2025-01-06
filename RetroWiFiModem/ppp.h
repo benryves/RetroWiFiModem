@@ -17,7 +17,7 @@ static u32_t ppp_output_cb(ppp_pcb *pcb, unsigned char *data, u32_t len, void *c
 }
 
 // fires when connection established or torn down
-void ppp_status_cb(ppp_pcb *pcb, int err_code, void *ctx) {
+static void ppp_status_cb(ppp_pcb *pcb, int err_code, void *ctx) {
   struct netif *pppif = ppp_netif(pcb);
   LWIP_UNUSED_ARG(ctx);
 

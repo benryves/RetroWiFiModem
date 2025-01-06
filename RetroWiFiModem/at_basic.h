@@ -217,6 +217,10 @@ char *dialNumber(char *atCmd) {
          #endif
          ppp_set_ipcp_ouraddr(ppp, ip_2_ip4((const ip_addr_t*)WiFi.localIP()));
          ppp_set_ipcp_hisaddr(ppp, ip_2_ip4((const ip_addr_t*)IPAddress(192,168,240,2)));
+         
+         //  Only for PPPoS, the PPP session should be up and waiting for input.
+         ppp_set_silent(ppp, 1);
+         
          err_t ppp_err;
          ppp_err = ppp_listen(ppp);
          if (ppp_err == PPPERR_NONE) {
