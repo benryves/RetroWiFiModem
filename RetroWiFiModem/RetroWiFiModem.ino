@@ -85,10 +85,13 @@ void setup(void) {
      WiFi.hostname(settings.hostName);
    }
 
-   WiFi.begin();
-   if( settings.ssid[0] ) {
+   WiFi.setAutoConnect(false);
+   if( settings.ssid[0] && settings.wifiPassword[0] ) {
+      WiFi.begin(settings.ssid, settings.wifiPassword);
       WiFi.waitForConnectResult();
       WiFi.mode(WIFI_STA);
+   } else {
+      WiFi.begin();
    }
    WiFiClient::setDefaultNoDelay(true);  // disable Nalge algorithm by default
 
@@ -331,6 +334,9 @@ void doAtCmds(char *atCmd) {
                } else if( !strncasecmp(atCmd, "#CLS=", 5) ) {
                   // voice mode
                   atCmd = doVoiceMode(atCmd + 5);
+               } else if ( !strncasecmp(atCmd, "$PPP", 4) ) {
+                  // PPP number
+                  atCmd = doPPP(atCmd + 4);
                } else {
                   // unrecognized command
                   sendResult(R_ERROR);

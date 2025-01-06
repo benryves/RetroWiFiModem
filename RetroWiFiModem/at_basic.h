@@ -187,7 +187,7 @@ char *dialNumber(char *atCmd) {
    yield();
 
    // are we dialling a PPP connection?
-   if ( !strcasecmp(host, "PPP") ) {
+   if ( !strcasecmp(host, settings.pppNumber) && strlen(settings.pppNumber) ) {
       if ( ppp ) {
          Serial.println("PPP already active");
          sendResult(R_ERROR);

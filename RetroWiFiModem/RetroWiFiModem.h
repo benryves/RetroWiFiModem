@@ -10,7 +10,7 @@
    #define ESC_CHAR              '+'
    #define ESC_COUNT             3
    #define GUARD_TIME            1000
-   #define MAGIC_NUMBER          0x5432
+   #define MAGIC_NUMBER          0x5106
    #define MAX_SSID_LEN          32
    #define MAX_WIFI_PWD_LEN      64
    #define DEFAULT_LISTEN_PORT   6400
@@ -21,6 +21,7 @@
    #define MAX_ALIAS_LEN         16
    #define MAX_SPEED_DIAL_LEN    50
    #define MAGIC_SPEED_LEN       7
+   #define MAX_PPP_LEN           16
    #define MAX_MDNSNAME_LEN      80
    #define MAX_HOSTNAME_LEN      24
    #define MAX_BUSYMSG_LEN       80

@@ -710,6 +710,7 @@ void displayCurrentSettings(void) {
          yield();
       }
    }
+   Serial.printf("PPP number.: %s\r\n", settings.pppNumber); yield();
 }
 
 //
@@ -761,6 +762,7 @@ void displayStoredSettings(void) {
          yield();
       }
    }
+   Serial.printf("PPP number.: %s\r\n", EEPROM.get(offsetof(struct Settings, pppNumber), v_char24)); yield();
 }
 
 //

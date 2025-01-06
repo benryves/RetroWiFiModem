@@ -472,3 +472,30 @@ char *doStartupWait(char *atCmd) {
    }
    return atCmd;
 }
+
+//
+// AT$PPP? query PPP number
+// AT$PPP=ppp set PPP number
+//
+char *doPPP(char *atCmd) {
+   switch( atCmd[0] ) {
+      case '?':
+         ++atCmd;
+         Serial.println(settings.pppNumber);
+         if( !atCmd[0] ) {
+            sendResult(R_OK);
+         }
+         break;
+      case '=':
+         ++atCmd;
+         strncpy(settings.pppNumber, atCmd, MAX_PPP_LEN);
+         settings.pppNumber[MAX_PPP_LEN] = NUL;
+         atCmd[0] = NUL;
+         sendResult(R_OK);
+         break;
+      default:
+         sendResult(R_ERROR);
+         break;
+   }
+   return atCmd;
+}

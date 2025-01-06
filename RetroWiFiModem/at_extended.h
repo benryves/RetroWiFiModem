@@ -17,6 +17,7 @@ char *factoryDefaults(char *atCmd) {
       settings.alias[i][0] = NUL;
       settings.speedDial[i][0] = NUL;
    }
+   strcpy(settings.pppNumber, "*99#");
    strcpy(settings.mdnsName, "RetroWiFiModem");
    settings.hostName[0] = NUL;
    settings.autoAnswer = 0;
