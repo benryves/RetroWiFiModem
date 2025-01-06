@@ -325,6 +325,12 @@ void doAtCmds(char *atCmd) {
                } else if( !strncasecmp(atCmd, "L", 1) ) {
                   // speaker loudness
                   atCmd = doSpeakerLoudness(atCmd + 1);
+               } else if( !strncasecmp(atCmd, "+FCLASS=", 8) ) {
+                  // voice mode
+                  atCmd = doVoiceMode(atCmd + 8);
+               } else if( !strncasecmp(atCmd, "#CLS=", 5) ) {
+                  // voice mode
+                  atCmd = doVoiceMode(atCmd + 5);
                } else {
                   // unrecognized command
                   sendResult(R_ERROR);

@@ -273,3 +273,27 @@ char *doSpeedDialSlot(char *atCmd) {
    }
    return atCmd;
 }
+
+//
+// AT+FCLASS=? or AT#CLS=? query supported voice modes
+// AT+FCLASS=0 or AT#CLS=0 set mode=0 (data)
+//
+char *doVoiceMode(char *atCmd) {
+   switch ( atCmd[0] ) {
+      case '0':
+         ++atCmd;
+         // do nothing, as it's assumed we're only in data mode
+         break;
+      case '?':
+         ++atCmd;
+         Serial.println("0"); // only mode 0, data, is supported
+         break;
+      default:
+         sendResult(R_ERROR);
+         return atCmd;
+   }
+   if ( !atCmd[0] ) {
+      sendResult(R_OK);
+   }
+   return atCmd;
+}
