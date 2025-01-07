@@ -56,7 +56,8 @@ void sendSerialData() {
    if( len > maxBufSize) {
       len = maxBufSize;
    }
-   Serial.readBytes(txBuf, len);
+   
+   if (!(len = Serial.readBytes(txBuf, len))) return;
 
    uint32_t serialInterval = millis() - lastSerialData;
    // if more than 1 second since the last character,
